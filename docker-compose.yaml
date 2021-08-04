@@ -22,18 +22,16 @@ services:
       - "7687:7687"
   users-api:
     image: meaty/users-api
-    hostname: usersapi
-    container_name: usersapi
     build:
       context: ./users-service
       dockerfile: Dockerfile
     environment:
-      - DB:bolt://usersdb:7687
+      - DB=bolt://usersdb:7687
       - DB_USER=neo4j
       - DB_PASS=${NEO_PASS}
       - SECRET=${SECRET}
       - CONSUL_HTTP_ADDR=consul:8500
-      - PORT=8080
+      - PORT=:8080
     ports:
       - 8080
     depends_on:
