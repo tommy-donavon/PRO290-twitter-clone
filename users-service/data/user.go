@@ -113,6 +113,28 @@ func (ur *UserRepo) FollowUser(user, following string) error {
 	return err
 }
 
+func (ur *UserRepo) DeleteUser(username string) error {
+	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	query := "MATCH (n:User) WHERE n.username = $username DETACH DELETE n"
+	_, err := session.Run(query, map[string]interface{}{
+		"username": username,
+	})
+	return err
+
+}
+
+func (ur *UserRepo) UnFollowUser(user, following string) error {
+	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	query := "MATCH (a:User{username:$username})-[r:Following]->(b:User{username:$following}) DELETE r"
+	_, err := session.Run(query, map[string]interface{}{
+		"username":  user,
+		"following": following,
+	})
+	return err
+}
+
 func (u *User) CheckPassword(provided string) error {
 	return bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(provided))
 }

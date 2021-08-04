@@ -20,6 +20,11 @@ func SetUpRoutes(sm *mux.Router, userHandler *handlers.UserHandler) {
 	followRouter.HandleFunc("/{username}", userHandler.FollowUser())
 	followRouter.Use(userHandler.Auth)
 
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/{username}", userHandler.UnFollowUser())
+	deleteRouter.HandleFunc("/", userHandler.DeleteUser())
+	deleteRouter.Use(userHandler.Auth)
+
 	healthHandler := sm.Methods(http.MethodGet).Subrouter()
 	healthHandler.HandleFunc("/healthcheck", userHandler.HealthCheck())
 

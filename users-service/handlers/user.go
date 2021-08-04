@@ -52,6 +52,18 @@ func (uh *UserHandler) CreateUser() http.HandlerFunc {
 	}
 }
 
+func (uh *UserHandler) DeleteUser() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		userInformation := r.Context().Value(keyValue{}).(userInformation)
+		if err := uh.repo.DeleteUser(userInformation.Username); err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
+			return
+		}
+		rw.WriteHeader(http.StatusNoContent)
+	}
+}
+
 func (uh *UserHandler) LoginUser() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		uh.log.Println("POST LOGIN")
@@ -91,6 +103,18 @@ func (uh *UserHandler) FollowUser() http.HandlerFunc {
 		}
 		rw.WriteHeader(http.StatusNoContent)
 
+	}
+}
+
+func (uh *UserHandler) UnFollowUser() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		userInfo := r.Context().Value(keyValue{}).(userInformation)
+		if err := uh.repo.UnFollowUser(userInfo.Username, getUserName(r)); err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
+			return
+		}
+		rw.WriteHeader(http.StatusNoContent)
 	}
 }
 
