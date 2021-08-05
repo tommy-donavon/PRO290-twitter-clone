@@ -54,3 +54,32 @@ services:
       - nginx-data
     ports:
       - 8080:80
+  post-db:
+    image: postgres:latest
+    container_name: post-db
+    restart: always
+    environment: 
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - APP_DB_USER=admin
+      - APP_DB_PASS=${POSTGRES_PASSWORD}
+      - APP_DB_NAME=posts
+    ports: 
+      - '5438:5432'
+    volumes: 
+      - ./postsdb/config:/docker-entrypoint-initdb.d/
+      # - ./postsdb/db-data:/var/lib/postgresql/data
+  post-api:
+    image: meaty/postapi
+    build: 
+      context: ./post-service
+      dockerfile: Dockerfile
+    environment: 
+      - DSN=host=post-db user=admin password=${POSTGRES_PASSWORD} dbname=posts port=5432 sslmode=disable
+      - PORT=:8080
+      - CONSUL_HTTP_ADDR=consul:8500 
+    ports: 
+        - 8080
+    depends_on: 
+        - post-db
+    restart: always

@@ -159,3 +159,5 @@ fabric.properties
 
 # Eniroment files
 .env
+
+db-data/
