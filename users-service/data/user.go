@@ -11,11 +11,13 @@ import (
 
 type (
 	User struct {
-		Username string `json:"username" validate:"required"`
-		Name     string `json:"name" validate:"required"`
-		Password string `json:"password" validate:"required"`
-		Email    string `json:"email" validate:"required,email"`
-		UserType int    `json:"user_type" validate:"gte=0,lte=1"`
+		Username   string `json:"username" validate:"required"`
+		Name       string `json:"name" validate:"required"`
+		ProfileURI string `json:"profile_uri"`
+		CoverURI   string `json:"cover_uri"`
+		Password   string `json:"password" validate:"required"`
+		Email      string `json:"email" validate:"required,email"`
+		UserType   int    `json:"user_type" validate:"gte=0,lte=1"`
 	}
 
 	UserRepo struct {
