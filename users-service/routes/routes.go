@@ -33,6 +33,6 @@ func SetUpRoutes(sm *mux.Router, userHandler *handlers.UserHandler) {
 	getUserHandler.Use(userHandler.Auth)
 
 	getFollowers := sm.Methods(http.MethodGet).Subrouter()
-	getFollowers.HandleFunc("/{username}", userHandler.GetFollowerList())
+	getFollowers.HandleFunc("/{username}", userHandler.GetFollowingList())
 
 }

@@ -124,10 +124,11 @@ func (uh *UserHandler) GetLoggedInUser() http.HandlerFunc {
 		data.ToJSON(&client, rw)
 	}
 }
-func (uh *UserHandler) GetFollowerList() http.HandlerFunc {
+func (uh *UserHandler) GetFollowingList() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-type", "application/json")
 		username := getUserName(r)
-		users, err := uh.repo.GetFollowerList(username)
+		users, err := uh.repo.GetFollowingList(username)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			data.ToJSON(&generalMessage{err.Error()}, rw)

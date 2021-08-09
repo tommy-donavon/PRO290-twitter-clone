@@ -20,6 +20,11 @@ type (
 		UserType   int    `json:"user_type" validate:"gte=0,lte=1"`
 	}
 
+	FollowInformation struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
+
 	UserRepo struct {
 		DB neo4j.Driver
 	}
@@ -101,7 +106,7 @@ func (ur *UserRepo) GetUser(username string) (*User, error) {
 
 }
 
-func (ur *UserRepo) GetFollowerList(username string) ([]*User, error) {
+func (ur *UserRepo) GetFollowingList(username string) ([]*FollowInformation, error) {
 	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
 
@@ -112,15 +117,15 @@ func (ur *UserRepo) GetFollowerList(username string) ([]*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	users := []*User{}
+	users := []*FollowInformation{}
 	for result.Next() {
 		record := result.Record()
 		if value, ok := record.Get("n"); ok {
 			node := value.(neo4j.Node)
 			props := node.Props
-			user := User{}
+			user := FollowInformation{}
 			if err := mapstructure.Decode(props, &user); err != nil {
-				return []*User{}, nil
+				return []*FollowInformation{}, nil
 			}
 			users = append(users, &user)
 
