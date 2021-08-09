@@ -124,6 +124,18 @@ func (uh *UserHandler) GetLoggedInUser() http.HandlerFunc {
 		data.ToJSON(&client, rw)
 	}
 }
+func (uh *UserHandler) GetFollowerList() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		username := getUserName(r)
+		users, err := uh.repo.GetFollowerList(username)
+		if err != nil {
+			rw.WriteHeader(http.StatusInternalServerError)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
+			return
+		}
+		data.ToJSON(users, rw)
+	}
+}
 
 func (uh *UserHandler) HealthCheck() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {

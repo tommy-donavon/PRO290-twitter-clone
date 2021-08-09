@@ -10,6 +10,11 @@ import (
 func SetUpRoutes(sm *mux.Router, postHandler *handlers.PostHandler) {
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", postHandler.CreatePost())
+	postRouter.HandleFunc("/{id:[0-9]+}", postHandler.CreatePost())
 	postRouter.Use(postHandler.Auth)
 	postRouter.Use(postHandler.MiddleWareValidatePost)
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/healthcheck", postHandler.HealthCheck())
+	getRouter.HandleFunc("/{id:[0-9]+}", postHandler.GetPost())
 }

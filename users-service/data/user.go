@@ -101,6 +101,34 @@ func (ur *UserRepo) GetUser(username string) (*User, error) {
 
 }
 
+func (ur *UserRepo) GetFollowerList(username string) ([]*User, error) {
+	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
+	defer session.Close()
+
+	query := "MATCH (a:User{username:$username})-[r:Following]->(n:User) RETURN n"
+	result, err := session.Run(query, map[string]interface{}{
+		"username": username,
+	})
+	if err != nil {
+		return nil, err
+	}
+	users := []*User{}
+	for result.Next() {
+		record := result.Record()
+		if value, ok := record.Get("n"); ok {
+			node := value.(neo4j.Node)
+			props := node.Props
+			user := User{}
+			if err := mapstructure.Decode(props, &user); err != nil {
+				return []*User{}, nil
+			}
+			users = append(users, &user)
+
+		}
+	}
+	return users, nil
+}
+
 func (ur *UserRepo) FollowUser(user, following string) error {
 	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()

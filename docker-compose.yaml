@@ -43,6 +43,15 @@ services:
       - "8300:8300"
       - "8400:8400"
       - "8500:8500"
+  gateway: 
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: meaty/nginx-consul-template
+    volumes: 
+      - ./nginx/templates:/etc/consul-template/templates
+      - ./nginx/conf:/etc/consul-template/conf/
+      - ./nginx/nginx.conf:/usr/nginx/nginx.conf
   nginx-data:
     build:
       context: ./nginx
@@ -54,6 +63,7 @@ services:
       - nginx-data
     ports:
       - 8080:80
+  
   post-db:
     image: postgres:latest
     container_name: post-db
