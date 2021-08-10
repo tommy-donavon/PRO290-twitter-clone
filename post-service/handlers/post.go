@@ -61,27 +61,6 @@ func (ph *PostHandler) CreatePost() http.HandlerFunc {
 	}
 }
 
-func (ph *PostHandler) GetPost() http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		ph.log.Println("GET POST")
-		rw.Header().Set("Content-type", "application/json")
-		id := getPostId(r)
-		post := ph.repo.GetPost(uint(id))
-		if post.ID == 0 {
-			rw.WriteHeader(http.StatusNotFound)
-			data.ToJSON(&generalMesage{"Post not found"}, rw)
-			return
-		}
-		data.ToJSON(post, rw)
-	}
-}
-
-func (ph *PostHandler) HealthCheck() http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		data.ToJSON(&generalMesage{"Good to go"}, rw)
-	}
-}
-
 func (ph *PostHandler) sendNewRequest(serviceName, methodType string, headerOptions map[string]string) (*http.Response, error) {
 	ser, err := ph.reg.LookUpService(serviceName)
 	if err != nil {

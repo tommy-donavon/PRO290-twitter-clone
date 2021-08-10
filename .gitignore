@@ -26,8 +26,8 @@ logs
 **/*.backup.*
 **/*.back.*
 
-node_modules
-bower_components
+node_modules/
+bower_components/
 
 *.sublime*
 
@@ -36,7 +36,7 @@ thumb
 sketch
 
 ### VisualStudioCode ###
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json

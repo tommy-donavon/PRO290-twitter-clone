@@ -89,7 +89,18 @@ services:
       - PORT=:8080
       - CONSUL_HTTP_ADDR=consul:8500 
     ports: 
-        - 8080
+      - 8080
     depends_on: 
         - post-db
+    restart: always
+  notifications-api:
+    image: meaty/notificationsapi
+    build: 
+      context: ./notifications-service
+      dockerfile: Dockerfile
+    environment: 
+      - CONSUL_HTTP_ADDR=consul:8500 
+      - PORT=:8080
+    ports: 
+      - 8080
     restart: always
