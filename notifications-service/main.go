@@ -55,7 +55,7 @@ func main() {
 	}()
 	defer server.Close()
 
-	http.Handle("/socket.io/", server)
+	http.Handle("/", server)
 	// http.Handle("/", http.FileServer(http.Dir("./asset")))
 	http.Handle("/healthcheck", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		data.ToJSON(&struct{ message string }{"service good to go"}, rw)
