@@ -21,6 +21,14 @@ func (ph *PostHandler) GetPost() http.HandlerFunc {
 	}
 }
 
+func (ph *PostHandler) GetAllPosts() http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		ph.log.Println("GET ALL POSTS")
+		rw.Header().Set("Content-type", "application/json")
+		data.ToJSON(ph.repo.GetAllPosts(), rw)
+	}
+}
+
 func (ph *PostHandler) HealthCheck() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		data.ToJSON(&generalMesage{"Good to go"}, rw)

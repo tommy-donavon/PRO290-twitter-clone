@@ -48,6 +48,12 @@ func (pr *PostRepo) CreatePost(post *Post, id uint) error {
 	return pr.db.Create(post).Error
 }
 
+func (pr *PostRepo) GetAllPosts() []*Post {
+	posts := []*Post{}
+	pr.db.Find(&posts)
+	return posts
+}
+
 func (pr *PostRepo) GetPost(id uint) *Post {
 	p := Post{}
 	pr.db.Preload("Comments").Where("id = ?", id).First(&p)

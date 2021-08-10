@@ -17,4 +17,5 @@ func SetUpRoutes(sm *mux.Router, postHandler *handlers.PostHandler) {
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/healthcheck", postHandler.HealthCheck())
 	getRouter.HandleFunc("/{id:[0-9]+}", postHandler.GetPost())
+	getRouter.HandleFunc("/", postHandler.GetAllPosts())
 }
