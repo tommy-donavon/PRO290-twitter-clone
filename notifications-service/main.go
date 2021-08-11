@@ -23,22 +23,22 @@ func main() {
 		return nil
 	})
 
-	server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
-		log.Println("notice:", msg)
-		s.Emit("reply", "have "+msg)
-	})
+	// server.OnEvent("/", "notice", func(s socketio.Conn, msg string) {
+	// 	log.Println("notice:", msg)
+	// 	s.Emit("reply", "have "+msg)
+	// })
 
-	server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
-		s.SetContext(msg)
-		return "recv " + msg
-	})
+	// server.OnEvent("/chat", "msg", func(s socketio.Conn, msg string) string {
+	// 	s.SetContext(msg)
+	// 	return "recv " + msg
+	// })
 
-	server.OnEvent("/", "bye", func(s socketio.Conn) string {
-		last := s.Context().(string)
-		s.Emit("bye", last)
-		s.Close()
-		return last
-	})
+	// server.OnEvent("/", "bye", func(s socketio.Conn) string {
+	// 	last := s.Context().(string)
+	// 	s.Emit("bye", last)
+	// 	s.Close()
+	// 	return last
+	// })
 
 	server.OnError("/", func(s socketio.Conn, e error) {
 		log.Println("meet error:", e)
@@ -56,11 +56,9 @@ func main() {
 	defer server.Close()
 
 	http.Handle("/", server)
-	// http.Handle("/", http.FileServer(http.Dir("./asset")))
 	http.Handle("/healthcheck", http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		data.ToJSON(&struct{ message string }{"service good to go"}, rw)
 	}))
 
 	log.Fatal(http.ListenAndServe(os.Getenv("PORT"), nil))
-	// log.Fatal(http.ListenAndServe(":8080", nil))
 }

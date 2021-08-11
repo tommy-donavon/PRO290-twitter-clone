@@ -33,7 +33,7 @@ func NewPostHandler(repo *data.PostRepo, log *log.Logger, reg *register.ConsulCl
 func (ph *PostHandler) CreatePost() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		post := r.Context().Value(keyValue{}).(data.Post)
-		resp, err := ph.sendNewRequest("users-service", "GET", map[string]string{"Authorization": r.Header.Get("Authorization")})
+		resp, err := ph.sendNewRequest("users-service", "GET", "", map[string]string{"Authorization": r.Header.Get("Authorization")})
 		if err != nil || resp.StatusCode != http.StatusOK {
 			ph.log.Println("[ERROR] Unable to establish connection to internal service", err)
 			rw.WriteHeader(http.StatusInternalServerError)
@@ -61,12 +61,13 @@ func (ph *PostHandler) CreatePost() http.HandlerFunc {
 	}
 }
 
-func (ph *PostHandler) sendNewRequest(serviceName, methodType string, headerOptions map[string]string) (*http.Response, error) {
+func (ph *PostHandler) sendNewRequest(serviceName, methodType, endpoint string, headerOptions map[string]string) (*http.Response, error) {
 	ser, err := ph.reg.LookUpService(serviceName)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest(methodType, ser.GetHTTP(), nil)
+	ph.log.Println(ser.GetHTTP() + endpoint)
+	req, err := http.NewRequest(methodType, ser.GetHTTP()+endpoint, nil)
 	if err != nil {
 		return nil, err
 	}

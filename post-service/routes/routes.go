@@ -14,6 +14,10 @@ func SetUpRoutes(sm *mux.Router, postHandler *handlers.PostHandler) {
 	postRouter.Use(postHandler.Auth)
 	postRouter.Use(postHandler.MiddleWareValidatePost)
 
+	feedRouter := sm.Methods(http.MethodGet).Subrouter()
+	feedRouter.HandleFunc("/feed", postHandler.GetFeed())
+	feedRouter.Use(postHandler.Auth)
+
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/healthcheck", postHandler.HealthCheck())
 	getRouter.HandleFunc("/{id:[0-9]+}", postHandler.GetPost())

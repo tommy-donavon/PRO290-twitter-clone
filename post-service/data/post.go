@@ -20,6 +20,11 @@ type (
 		Comments     []*Post `gorm:"foreignkey:refers_to_post" json:"comments"`
 	}
 
+	FollowInformation struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+	}
+
 	PostRepo struct {
 		db *gorm.DB
 	}
@@ -50,7 +55,7 @@ func (pr *PostRepo) CreatePost(post *Post, id uint) error {
 
 func (pr *PostRepo) GetAllPosts() []*Post {
 	posts := []*Post{}
-	pr.db.Find(&posts)
+	pr.db.Preload("Comments").Find(&posts)
 	return posts
 }
 
@@ -58,6 +63,16 @@ func (pr *PostRepo) GetPost(id uint) *Post {
 	p := Post{}
 	pr.db.Preload("Comments").Where("id = ?", id).First(&p)
 	return &p
+}
+
+func (pr *PostRepo) GetFeed(username string, following []*FollowInformation) []*Post {
+	feed := []*Post{}
+	usernames := []string{}
+	for _, val := range following {
+		usernames = append(usernames, val.Username)
+	}
+	pr.db.Preload("Comments").Where("(author = ? OR author in ?) AND refers_to_post is null", username, usernames).Order("created_at DESC").Find(&feed)
+	return feed
 }
 
 func (p *Post) Validate() error {
