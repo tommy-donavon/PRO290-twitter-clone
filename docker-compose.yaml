@@ -32,6 +32,7 @@ services:
       - SECRET=${SECRET}
       - CONSUL_HTTP_ADDR=consul:8500
       - PORT=:8080
+      - RABBIT_CONN=amqp://guest:guest@rabbit:5672/
     ports:
       - 8080
     depends_on:
@@ -93,14 +94,30 @@ services:
     depends_on: 
         - post-db
     restart: always
-  # notifications-api:
-  #   image: meaty/notificationsapi
-  #   build: 
-  #     context: ./notifications-service
-  #     dockerfile: Dockerfile
-  #   environment: 
-  #     - CONSUL_HTTP_ADDR=consul:8500 
-  #     - PORT=:8080
-  #   ports: 
-  #     - 8080
-  #   restart: always
+  notifications-api:
+    image: meaty/notificationsapi
+    build: 
+      context: ./notifications-service
+      dockerfile: Dockerfile
+    environment: 
+      - CONSUL_HTTP_ADDR=consul:8500 
+      - PORT=:8080
+      - REDIS_HOST=note-redis-store
+      - REDIS_PORT=6379
+      - RABBIT_CONN=amqp://guest:guest@rabbit:5672/
+    ports: 
+      - 8080
+    restart: always
+  message-broker:
+    image: rabbitmq:3-management
+    container_name: message-broker
+    hostname: rabbit 
+    ports: 
+      - '5672:5672'
+      - '15672:15672'
+  notification-db:
+    image: redis:alpine
+    container_name: note-redis-store
+    hostname: note-redis-store
+    ports: 
+        - 6379:6379

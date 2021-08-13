@@ -9,9 +9,15 @@ import (
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/data"
 )
 
+func (uh *UserHandler) GlobalContentTypeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-type", "application/json")
+		next.ServeHTTP(rw, r)
+	})
+}
+
 func (uh *UserHandler) MiddlewareValidateUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Add("Content-Type", "application/json")
 		User := data.User{}
 		if err := data.FromJSON(&User, r.Body); err != nil {
 			uh.log.Println(err)
@@ -34,7 +40,6 @@ func (uh *UserHandler) MiddlewareValidateUser(next http.Handler) http.Handler {
 
 func (uh *UserHandler) MiddlewareValidateLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Add("Content-Type", "application/json")
 		login := data.Login{}
 		if err := data.FromJSON(&login, r.Body); err != nil {
 			uh.log.Println("[ERROR] deserializing login", err)
@@ -57,7 +62,6 @@ func (uh *UserHandler) MiddlewareValidateLogin(next http.Handler) http.Handler {
 
 func (uh *UserHandler) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Add("Content-Type", "application/json")
 		token := r.Header.Get("Authorization")
 		if token == "" {
 			rw.WriteHeader(http.StatusForbidden)

@@ -14,7 +14,6 @@ func (uh *UserHandler) GetLoggedInUser() http.HandlerFunc {
 }
 func (uh *UserHandler) GetFollowingList() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Content-type", "application/json")
 		username := getUserName(r)
 		users, err := uh.repo.GetFollowingList(username)
 		if err != nil {
@@ -27,7 +26,6 @@ func (uh *UserHandler) GetFollowingList() http.HandlerFunc {
 }
 func (uh *UserHandler) GetFollowersList() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Content-type", "application/json")
 		username := getUserName(r)
 		users, err := uh.repo.GetFollowersList(username)
 		if err != nil {

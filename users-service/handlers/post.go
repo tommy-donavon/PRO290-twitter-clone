@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/data"
 )
 
@@ -39,10 +41,14 @@ func (uh *UserHandler) FollowUser() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		userInfo := r.Context().Value(keyValue{}).(userInformation)
 		if err := uh.repo.FollowUser(userInfo.Username, getUserName(r)); err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
+			rw.WriteHeader(http.StatusBadRequest)
 			data.ToJSON(&generalMessage{err.Error()}, rw)
 			return
 		}
+		uh.messenger.SubmitToMessageBroker(&amqp.Message{
+			Username: getUserName(r),
+			Message:  fmt.Sprintf("%s followed you!!", userInfo.Username),
+		})
 		rw.WriteHeader(http.StatusNoContent)
 
 	}

@@ -74,6 +74,25 @@ func (pr *PostRepo) GetFeed(username string, following []*FollowInformation) []*
 	pr.db.Preload("Comments").Where("(author = ? OR author in ?) AND refers_to_post is null", username, usernames).Order("created_at DESC").Find(&feed)
 	return feed
 }
+func (pr *PostRepo) LikePost(id uint) error {
+	post := Post{}
+	err := pr.db.Where("id = ?", id).First(&post).Error
+	if err != nil {
+		return err
+	}
+	post.Likes++
+	return pr.db.Save(&post).Error
+}
+
+func (pr *PostRepo) UnlikePost(id uint) error {
+	post := Post{}
+	err := pr.db.Where("id = ?", id).First(&post).Error
+	if err != nil {
+		return err
+	}
+	post.Likes--
+	return pr.db.Save(&post).Error
+}
 
 func (p *Post) Validate() error {
 	validator := validator.New()

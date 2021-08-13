@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/data"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/handlers"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/register"
@@ -26,7 +27,7 @@ func main() {
 
 	userRepo := data.NewUserRepo()
 	defer userRepo.DB.Close()
-	userHandler := handlers.NewUserHandler(userRepo, logger, os.Getenv("SECRET"))
+	userHandler := handlers.NewUserHandler(userRepo, logger, os.Getenv("SECRET"), amqp.NewMessenger(os.Getenv("RABBIT_CONN")))
 
 	routes.SetUpRoutes(sm, userHandler)
 
@@ -50,7 +51,6 @@ func main() {
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, os.Kill)
 	signal.Notify(c, syscall.SIGTERM)
 	sig := <-c
 	logger.Println("Got Signal:", sig)

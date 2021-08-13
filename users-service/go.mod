@@ -11,6 +11,7 @@ require (
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/neo4j/neo4j-go-driver/v4 v4.3.3
+	github.com/streadway/amqp v1.0.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 )

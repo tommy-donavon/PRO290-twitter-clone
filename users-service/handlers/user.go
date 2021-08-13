@@ -5,15 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/auth"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/data"
 )
 
 type (
 	UserHandler struct {
-		repo *data.UserRepo
-		log  *log.Logger
-		jwt  *auth.JwtWrapper
+		repo      *data.UserRepo
+		log       *log.Logger
+		jwt       *auth.JwtWrapper
+		messenger *amqp.Messenger
 	}
 	generalMessage struct {
 		Message interface{} `json:"message"`
@@ -25,7 +27,7 @@ type (
 	keyValue struct{}
 )
 
-func NewUserHandler(repo *data.UserRepo, log *log.Logger, key string) *UserHandler {
+func NewUserHandler(repo *data.UserRepo, log *log.Logger, key string, messanger *amqp.Messenger) *UserHandler {
 	return &UserHandler{
 		repo: repo,
 		log:  log,
@@ -34,6 +36,7 @@ func NewUserHandler(repo *data.UserRepo, log *log.Logger, key string) *UserHandl
 			Issuer:          "users-service",
 			ExpirationHours: 24,
 		},
+		messenger: messanger,
 	}
 }
 

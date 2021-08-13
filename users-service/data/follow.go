@@ -69,11 +69,18 @@ func (ur *UserRepo) GetFollowersList(username string) ([]*FollowInformation, err
 func (ur *UserRepo) FollowUser(user, following string) error {
 	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
-
-	_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
+	us, err := ur.GetUser(user)
+	if err != nil {
+		return err
+	}
+	fu, err := ur.GetUser(following)
+	if err != nil {
+		return err
+	}
+	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		_, err := tx.Run(
 			"MATCH (a:User),(b:User) WHERE a.username = $user AND b.username = $following CREATE (a)-[r:Following]->(b) RETURN type(r)",
-			map[string]interface{}{"user": user, "following": following},
+			map[string]interface{}{"user": us.Username, "following": fu.Username},
 		)
 		return nil, err
 	})
@@ -83,10 +90,18 @@ func (ur *UserRepo) FollowUser(user, following string) error {
 func (ur *UserRepo) UnFollowUser(user, following string) error {
 	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
+	us, err := ur.GetUser(user)
+	if err != nil {
+		return err
+	}
+	fu, err := ur.GetUser(following)
+	if err != nil {
+		return err
+	}
 	query := "MATCH (a:User{username:$username})-[r:Following]->(b:User{username:$following}) DELETE r"
-	_, err := session.Run(query, map[string]interface{}{
-		"username":  user,
-		"following": following,
+	_, err = session.Run(query, map[string]interface{}{
+		"username":  us.Username,
+		"following": fu.Username,
 	})
 	return err
 }

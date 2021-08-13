@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/go-playground/validator"
@@ -93,9 +94,12 @@ func (ur *UserRepo) GetUser(username string) (*User, error) {
 			node := value.(neo4j.Node)
 			props := node.Props
 			if err := mapstructure.Decode(props, &user); err != nil {
-				return &User{}, err
+				return nil, err
 			}
 		}
+	}
+	if user.Username == "" {
+		return nil, fmt.Errorf("no user found")
 	}
 	return &user, nil
 
