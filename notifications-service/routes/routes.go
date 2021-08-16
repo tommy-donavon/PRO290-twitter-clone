@@ -11,5 +11,4 @@ func SetUpRoutes(sm *mux.Router, nh *handlers.NotificationHandler) {
 	getRouter := sm.Methods(http.MethodGet).Subrouter()
 	getRouter.HandleFunc("/healthcheck", nh.HealthCheck())
 
-	// getRouter.HandleFunc("/", nh.NotificationConnection())
 }
