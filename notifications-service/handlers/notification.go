@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	socketio "github.com/googollee/go-socket.io"
-	"github.com/jasonlvhit/gocron"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/data"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/register"
@@ -38,7 +37,7 @@ func NewNotificationHandler(repo *data.NotificationRepo, log *log.Logger, reg *r
 func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 	nh.log.Println("GET SOCKET")
 	server := socketio.NewServer(nil)
-	getNotes := gocron.NewScheduler()
+	// getNotes := gocron.NewScheduler()
 	userInfo := userInformation{}
 
 	server.OnConnect("/", func(s socketio.Conn) error {
@@ -63,32 +62,33 @@ func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 			s.Close()
 			return
 		}
-		getNotes.Every(5).Seconds().Do(func() {
-			nh.log.Println("I'm being run")
-			nc, err := nh.repo.RetrieveNotifications(userInfo.Username)
-			if err != nil {
-				nh.log.Println(err)
-			}
-			notes := nc.Notification
-			for _, v := range notes {
-				s.Emit("notification", v)
-				notes = notes[1:]
-			}
-			nc.Notification = notes
-			err = nh.repo.SaveNotifications(nc)
-			if err != nil {
-				nh.log.Println(err)
-			}
-		})
-		<-getNotes.Start()
+		s.Emit("notification", "yo")
+		// getNotes.Every(5).Seconds().Do(func() {
+		// 	nh.log.Println("I'm being run")
+		// 	nc, err := nh.repo.RetrieveNotifications(userInfo.Username)
+		// 	if err != nil {
+		// 		nh.log.Println(err)
+		// 	}
+		// 	notes := nc.Notification
+		// 	for _, v := range notes {
+		// 		s.Emit("notification", v)
+		// 		// notes = notes[1:]
+		// 	}
+		// 	nc.Notification = notes
+		// 	err = nh.repo.SaveNotifications(nc)
+		// 	if err != nil {
+		// 		nh.log.Println(err)
+		// 	}
+		// })
+		// <-getNotes.Start()
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
-		log.Println("meet error:", e)
+		log.Println("[ERROR]:", e)
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		log.Println("closed", reason)
+		log.Println("[CLOSED]:", reason)
 	})
 	return server
 }

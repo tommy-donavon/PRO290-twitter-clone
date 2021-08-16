@@ -1,14 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/amqp"
@@ -42,34 +38,33 @@ func main() {
 
 	http.Handle("/socket.io/", server)
 
-	// routes.SetUpRoutes(sm, nh)
 	http.Handle("/healthcheck", nh.HealthCheck())
-	// http.Handle("/", nh.NotificationConnection())
+	logger.Fatal(http.ListenAndServe(os.Getenv("PORT"), nil))
 
-	serve := http.Server{
-		Addr:     os.Getenv("PORT"),
-		Handler:  http.DefaultServeMux,
-		ErrorLog: logger,
-		// ReadTimeout:  100 * time.Second,
-		// WriteTimeout: 100 * time.Second,
-		// IdleTimeout:  120 * time.Second,
-	}
+	// serve := http.Server{
+	// 	Addr:     os.Getenv("PORT"),
+	// 	Handler:  http.DefaultServeMux,
+	// 	ErrorLog: logger,
+	// 	// ReadTimeout:  100 * time.Second,
+	// 	// WriteTimeout: 100 * time.Second,
+	// 	// IdleTimeout:  120 * time.Second,
+	// }
 
-	go func() {
-		logger.Printf("Starting server on port: %v \n", serve.Addr)
-		err := serve.ListenAndServe()
-		if err != nil {
-			logger.Printf("Error starting server: %v \n", err)
-			os.Exit(1)
-		}
-	}()
+	// go func() {
+	// 	logger.Printf("Starting server on port: %v \n", serve.Addr)
+	// 	err := serve.ListenAndServe()
+	// 	if err != nil {
+	// 		logger.Printf("Error starting server: %v \n", err)
+	// 		os.Exit(1)
+	// 	}
+	// }()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, syscall.SIGTERM)
-	sig := <-c
-	logger.Println("Got Signal:", sig)
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	serve.Shutdown(ctx)
+	// c := make(chan os.Signal, 1)
+	// signal.Notify(c, os.Interrupt)
+	// signal.Notify(c, syscall.SIGTERM)
+	// sig := <-c
+	// logger.Println("Got Signal:", sig)
+	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// defer cancel()
+	// serve.Shutdown(ctx)
 }
