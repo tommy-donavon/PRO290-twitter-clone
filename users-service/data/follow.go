@@ -83,7 +83,7 @@ func (ur *UserRepo) FollowUser(user, following string) error {
 		return fmt.Errorf("user can not follow themselves")
 	}
 
-	query := "MATCH (a:User{username: $username}) MATCH (b:User{username: $Following}) MERGE (a)-[:following]->(b)"
+	query := "MATCH (a:User{username: $username}) MATCH (b:User{username: $following}) MERGE (a)-[:following]->(b)"
 	_, err = session.Run(query, map[string]interface{}{
 		"username":  us.Username,
 		"following": fu.Username,
