@@ -1,20 +1,23 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/data"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/register"
 )
 
 type (
 	PostHandler struct {
-		repo *data.PostRepo
-		log  *log.Logger
-		reg  *register.ConsulClient
+		repo      *data.PostRepo
+		log       *log.Logger
+		reg       *register.ConsulClient
+		messenger *amqp.Messenger
 	}
 	generalMesage struct {
 		Message interface{} `json:"message"`
@@ -26,8 +29,8 @@ type (
 	keyValue struct{}
 )
 
-func NewPostHandler(repo *data.PostRepo, log *log.Logger, reg *register.ConsulClient) *PostHandler {
-	return &PostHandler{repo, log, reg}
+func NewPostHandler(repo *data.PostRepo, log *log.Logger, reg *register.ConsulClient, messenger *amqp.Messenger) *PostHandler {
+	return &PostHandler{repo, log, reg, messenger}
 }
 
 func (ph *PostHandler) CreatePost() http.HandlerFunc {
@@ -56,6 +59,12 @@ func (ph *PostHandler) CreatePost() http.HandlerFunc {
 			data.ToJSON(&generalMesage{err.Error()}, rw)
 			return
 		}
+		if id != 0 {
+			ph.messenger.SubmitToMessageBroker(&amqp.Message{
+				Username: ph.repo.GetPost(uint(id)).Author,
+				Message:  fmt.Sprintf("%s commented %s on your post", userInfo.Username, post.PostBody),
+			})
+		}
 		rw.WriteHeader(http.StatusNoContent)
 
 	}
@@ -82,7 +91,7 @@ func getPostId(r *http.Request) int {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		return 0 //do something better than panic
+		return 0
 	}
 	return id
 }

@@ -1,6 +1,8 @@
 package data
 
 import (
+	"fmt"
+
 	"github.com/mitchellh/mapstructure"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 )
@@ -77,13 +79,16 @@ func (ur *UserRepo) FollowUser(user, following string) error {
 	if err != nil {
 		return err
 	}
-	_, err = session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
-		_, err := tx.Run(
-			"MATCH (a:User),(b:User) WHERE a.username = $user AND b.username = $following CREATE (a)-[r:Following]->(b) RETURN type(r)",
-			map[string]interface{}{"user": us.Username, "following": fu.Username},
-		)
-		return nil, err
+	if us.Username == fu.Username {
+		return fmt.Errorf("user can not follow themselves")
+	}
+
+	query := "MATCH (a:User{username: $username}) MATCH (b:User{username: $following}) MERGE (a)-[:Following]->(b)"
+	_, err = session.Run(query, map[string]interface{}{
+		"username":  us.Username,
+		"following": fu.Username,
 	})
+
 	return err
 }
 

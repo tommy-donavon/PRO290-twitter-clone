@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/data"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/handlers"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/register"
@@ -22,7 +23,7 @@ func main() {
 	consulClient := register.NewConsulClient("post-service")
 	consulClient.RegisterService()
 	defer consulClient.DeregisterService()
-	postHandler := handlers.NewPostHandler(data.NewPostRepo(), logger, consulClient)
+	postHandler := handlers.NewPostHandler(data.NewPostRepo(), logger, consulClient, amqp.NewMessenger(os.Getenv("RABBIT_CONN")))
 	routes.SetUpRoutes(sm, postHandler)
 
 	server := http.Server{
@@ -45,7 +46,6 @@ func main() {
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
-	signal.Notify(c, os.Kill)
 	signal.Notify(c, syscall.SIGTERM)
 	sig := <-c
 	logger.Println("Got Signal:", sig)

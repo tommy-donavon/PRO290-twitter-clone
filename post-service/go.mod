@@ -8,6 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/consul/api v1.9.1
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/streadway/amqp v1.0.0
 	gorm.io/driver/postgres v1.1.0
 	gorm.io/gorm v1.21.12
 )

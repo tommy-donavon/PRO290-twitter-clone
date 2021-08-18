@@ -88,7 +88,8 @@ services:
     environment: 
       - DSN=host=post-db user=admin password=${POSTGRES_PASSWORD} dbname=posts port=5432 sslmode=disable
       - PORT=:8080
-      - CONSUL_HTTP_ADDR=consul:8500 
+      - CONSUL_HTTP_ADDR=consul:8500
+      - RABBIT_CONN=amqp://guest:guest@rabbit:5672/
     ports: 
       - 8080
     depends_on: 
@@ -106,7 +107,7 @@ services:
       - REDIS_PORT=6379
       - RABBIT_CONN=amqp://guest:guest@rabbit:5672/
     ports: 
-      - 8081:8080
+      - 8080
     restart: always
   message-broker:
     image: rabbitmq:3-management
@@ -120,4 +121,4 @@ services:
     container_name: note-redis-store
     hostname: note-redis-store
     ports: 
-        - 6379:6379
+      - 6379:6379
