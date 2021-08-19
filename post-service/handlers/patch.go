@@ -42,12 +42,6 @@ func (ph *PostHandler) LikePost() http.HandlerFunc {
 
 func (ph *PostHandler) UnlikePost() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		// userInfo, err := ph.getUserInformation(r)
-		// if err != nil {
-		// 	rw.WriteHeader(http.StatusInternalServerError)
-		// 	data.ToJSON(&generalMesage{"unable to connect to user service"}, rw)
-		// 	return
-		// }
 		post := ph.repo.GetPost(uint(getPostId(r)))
 		if post.Author == "" {
 			ph.log.Println("[ERROR] No post found")

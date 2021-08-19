@@ -56,6 +56,7 @@ func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 		},
 	})
 	getNotes := gocron.NewScheduler()
+	sc := getNotes.Start()
 	userInfo := userInformation{}
 
 	server.OnConnect("/", func(s socketio.Conn) error {
@@ -97,16 +98,21 @@ func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 				nh.log.Println(err)
 			}
 		})
-		<-getNotes.Start()
+		<-sc
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
 		log.Println("[ERROR]:", e)
+
+		getNotes.Clear()
+		close(sc)
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
 		log.Println("[CLOSED]:", reason)
-		gocron.Clear()
+		getNotes.Clear()
+		close(sc)
+
 	})
 	return server
 }
