@@ -9,8 +9,11 @@ import (
 
 type (
 	FollowInformation struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
+		Username   string `json:"username"`
+		Email      string `json:"email"`
+		Name       string `json:"name"`
+		ProfileURI string `json:"profile_uri"`
+		CoverURI   string `json:"cover_uri"`
 	}
 )
 
