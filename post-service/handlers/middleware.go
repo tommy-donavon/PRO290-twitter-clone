@@ -7,35 +7,25 @@ import (
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/post-service/data"
 )
 
+func (ph *PostHandler) GlobalContentTypeMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Set("Content-type", "application/json")
+		next.ServeHTTP(rw, r)
+	})
+}
+
 func (ph *PostHandler) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		if token == "" {
-			rw.WriteHeader(http.StatusForbidden)
-			data.ToJSON(&generalMesage{"No token provided"}, rw)
-			return
-		}
-		serr, err := ph.reg.LookUpService("users-service")
+		resp, err := ph.sendNewRequest("users-service", "GET", "", map[string]string{
+			"Authorization": r.Header.Get("Authorization"),
+		})
 		if err != nil {
+
 			rw.WriteHeader(http.StatusInternalServerError)
 			data.ToJSON(&generalMesage{err.Error()}, rw)
 			return
 		}
-		req, err := http.NewRequest("GET", serr.GetHTTP(), nil)
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{err.Error()}, rw)
-			return
-		}
-		req.Header.Add("Authorization", token)
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{err.Error()}, rw)
-			return
-		}
-		defer resp.Body.Close()
+
 		if resp.StatusCode != http.StatusOK {
 			rw.WriteHeader(http.StatusUnauthorized)
 			data.ToJSON(&generalMesage{"You are not authorized to make this request"}, rw)

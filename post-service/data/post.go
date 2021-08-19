@@ -65,6 +65,10 @@ func (pr *PostRepo) GetPost(id uint) *Post {
 	return &p
 }
 
+func (pr *PostRepo) DeletePost(id uint) error {
+	return pr.db.Delete(&Post{}, id).Error
+}
+
 func (pr *PostRepo) GetFeed(username string, following []*FollowInformation) []*Post {
 	feed := []*Post{}
 	usernames := []string{}

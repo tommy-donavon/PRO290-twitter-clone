@@ -8,6 +8,7 @@ import (
 )
 
 func SetUpRoutes(sm *mux.Router, postHandler *handlers.PostHandler) {
+	sm.Use(postHandler.GlobalContentTypeMiddleware)
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", postHandler.CreatePost())
 	postRouter.HandleFunc("/{id:[0-9]+}", postHandler.CreatePost())
@@ -22,4 +23,12 @@ func SetUpRoutes(sm *mux.Router, postHandler *handlers.PostHandler) {
 	getRouter.HandleFunc("/healthcheck", postHandler.HealthCheck())
 	getRouter.HandleFunc("/{id:[0-9]+}", postHandler.GetPost())
 	getRouter.HandleFunc("/", postHandler.GetAllPosts())
+
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/{id:[0-9]+}", postHandler.DeletePost())
+	deleteRouter.Use(postHandler.Auth)
+
+	patchRouter := sm.Methods(http.MethodPatch).Subrouter()
+	patchRouter.HandleFunc("/{id:[0-9]+}", postHandler.LikePost())
+	patchRouter.Use(postHandler.Auth)
 }

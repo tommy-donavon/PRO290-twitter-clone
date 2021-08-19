@@ -17,10 +17,14 @@ type (
 func (ur *UserRepo) GetFollowingList(username string) ([]*FollowInformation, error) {
 	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
+	user, err := ur.GetUser(username)
+	if err != nil {
+		return nil, err
+	}
 
 	query := "MATCH (a:User{username:$username})-[r:Following]->(n:User) RETURN n"
 	result, err := session.Run(query, map[string]interface{}{
-		"username": username,
+		"username": user.Username,
 	})
 	if err != nil {
 		return []*FollowInformation{}, err
@@ -45,9 +49,13 @@ func (ur *UserRepo) GetFollowingList(username string) ([]*FollowInformation, err
 func (ur *UserRepo) GetFollowersList(username string) ([]*FollowInformation, error) {
 	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeRead})
 	defer session.Close()
+	user, err := ur.GetUser(username)
+	if err != nil {
+		return nil, err
+	}
 	query := "MATCH (a:User{username:$username})<-[r:Following]-(n:User) RETURN n"
 	result, err := session.Run(query, map[string]interface{}{
-		"username": username,
+		"username": user.Username,
 	})
 	if err != nil {
 		return []*FollowInformation{}, err

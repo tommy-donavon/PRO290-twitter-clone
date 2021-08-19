@@ -10,24 +10,15 @@ import (
 
 func (ph *PostHandler) LikePost() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		resp, err := ph.sendNewRequest("users-service", "GET", "", map[string]string{"Authorization": r.Header.Get("Authorization")})
-		if err != nil || resp.StatusCode != http.StatusOK {
-			ph.log.Println("[ERROR] Unable to establish connection to internal service", err)
+		userInfo, err := ph.getUserInformation(r)
+		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{"Unable to establish connection to internal service"}, rw)
-			return
-		}
-		defer resp.Body.Close()
-		userInfo := &userInformation{}
-		if err := data.FromJSON(&userInfo, resp.Body); err != nil {
-			ph.log.Println("[ERROR] deserializing response body", err)
-			rw.WriteHeader(http.StatusBadRequest)
-			data.ToJSON(&generalMesage{"Unable to retrieve user information"}, rw)
+			data.ToJSON(&generalMesage{"unable to connect to user service"}, rw)
 			return
 		}
 		post := ph.repo.GetPost(uint(getPostId(r)))
 		if post.Author == "" {
-			ph.log.Println("[ERROR] No post found", err)
+			ph.log.Println("[ERROR] No post found")
 			rw.WriteHeader(http.StatusBadRequest)
 			data.ToJSON(&generalMesage{"No post found"}, rw)
 			return

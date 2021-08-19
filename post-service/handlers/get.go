@@ -33,22 +33,15 @@ func (ph *PostHandler) GetFeed() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		ph.log.Println("GET FEED")
 		rw.Header().Set("Content-type", "application/json")
-		resp, err := ph.sendNewRequest("users-service", "GET", "", map[string]string{"Authorization": r.Header.Get("Authorization")})
-		if err != nil || resp.StatusCode != http.StatusOK {
+		userInfo,err := ph.getUserInformation(r)
+		if err != nil {
 			ph.log.Println("[ERROR] Unable to establish connection to internal service", err)
 			rw.WriteHeader(http.StatusInternalServerError)
 			data.ToJSON(&generalMesage{"Unable to establish connection to internal service"}, rw)
 			return
+
 		}
-		defer resp.Body.Close()
-		userInfo := &userInformation{}
-		if err := data.FromJSON(&userInfo, resp.Body); err != nil {
-			ph.log.Println("[ERROR] deserializing response body", err)
-			rw.WriteHeader(http.StatusBadRequest)
-			data.ToJSON(&generalMesage{"Unable to retrieve user information"}, rw)
-			return
-		}
-		resp, err = ph.sendNewRequest("users-service", "GET", userInfo.Username, map[string]string{"Authorization": r.Header.Get("Authorization")})
+		resp, err := ph.sendNewRequest("users-service", "GET", userInfo.Username, map[string]string{"Authorization": r.Header.Get("Authorization")})
 		if err != nil || resp.StatusCode != http.StatusOK {
 			ph.log.Println("[ERROR] Unable to establish connection to internal service", err)
 			rw.WriteHeader(http.StatusInternalServerError)

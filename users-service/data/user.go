@@ -1,6 +1,7 @@
 package data
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -63,8 +64,17 @@ func (ur *UserRepo) CreateUser(u *User) error {
 
 	_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run(
-			"CREATE (p:User{username:$username,name:$name,password:$password,email:$email,type:$type}) RETURN p",
-			map[string]interface{}{"username": u.Username, "name": u.Name, "password": u.Password, "email": u.Email, "type": u.UserType})
+			"CREATE (p:User{username:$username,name:$name, profileUri: $profileUri, CoverUri: $coverUri, password:$password,email:$email,type:$type}) RETURN p",
+			map[string]interface{}{
+				"username":   u.Username,
+				"name":       u.Name,
+				"profileUri": u.ProfileURI,
+				"coverUri":   u.CoverURI,
+				"password":   u.Password,
+				"email":      u.Email,
+				"type":       u.UserType,
+			},
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -112,6 +122,69 @@ func (ur *UserRepo) DeleteUser(username string) error {
 	_, err := session.Run(query, map[string]interface{}{
 		"username": username,
 	})
+	return err
+
+}
+
+func (ur *UserRepo) UpdateUser(username string, updateInfo map[string]string) error {
+	session := ur.DB.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+	user, err := ur.GetUser(username)
+	if err != nil {
+		return err
+	}
+	userInfoBytes, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+	userMap := map[string]interface{}{}
+	err = json.Unmarshal(userInfoBytes, &userMap)
+	if err != nil {
+		return err
+	}
+
+	for key, value := range updateInfo {
+		if _, ok := userMap[key]; ok {
+			switch key {
+			case "username":
+				user.Username = value
+			case "name":
+				user.Name = value
+			case "profile_uri":
+				user.ProfileURI = value
+			case "cover_uri":
+				user.CoverURI = value
+			case "password":
+				hashP, err := hashPassword(value)
+				if err != nil {
+					return err
+				}
+				user.Password = hashP
+			case "email":
+				user.Email = value
+			default:
+				break
+			}
+		}
+	}
+	if err := user.Validate(); err != nil {
+		return err
+	}
+	query := `MATCH (a:User{username: $username})
+			  SET a.username = $newUserName
+			  SET a.profileUri = $profileUri
+			  SET a.coverUri = $coverUri
+			  SET a.password = $password
+			  SET a.email = $email`
+	_, err = session.Run(query, map[string]interface{}{
+		"username":    username,
+		"newUserName": user.Username,
+		"profileUri":  user.ProfileURI,
+		"coverUri":    user.CoverURI,
+		"password":    user.Password,
+		"email":       user.Email,
+	})
+
 	return err
 
 }
