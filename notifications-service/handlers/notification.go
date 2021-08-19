@@ -106,13 +106,16 @@ func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
 		log.Println("[CLOSED]:", reason)
+		gocron.Clear()
 	})
 	return server
 }
 
 func (nh *NotificationHandler) HealthCheck() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		data.ToJSON(&struct{ message string }{"service good to go"}, rw)
+		data.ToJSON(&struct {
+			Message string `json:"message"`
+		}{"service good to go"}, rw)
 	}
 }
 func (ph *NotificationHandler) SendNewRequest(serviceName, methodType, endpoint string, headerOptions map[string]string) (*http.Response, error) {
