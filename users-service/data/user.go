@@ -64,7 +64,7 @@ func (ur *UserRepo) CreateUser(u *User) error {
 
 	_, err := session.WriteTransaction(func(tx neo4j.Transaction) (interface{}, error) {
 		result, err := tx.Run(
-			"CREATE (p:User{username:$username,name:$name, profileUri: $profileUri, CoverUri: $coverUri, password:$password,email:$email,type:$type}) RETURN p",
+			"CREATE (p:User{username:$username,name:$name, profileUri: $profileUri, coverUri: $coverUri, password:$password,email:$email,type:$type}) RETURN p",
 			map[string]interface{}{
 				"username":   u.Username,
 				"name":       u.Name,
@@ -163,7 +163,7 @@ func (ur *UserRepo) UpdateUser(username string, updateInfo map[string]string) er
 			case "email":
 				user.Email = value
 			default:
-				break
+				return fmt.Errorf("provided field %s is not a valid property", key)
 			}
 		}
 	}

@@ -9,7 +9,13 @@ import (
 func (uh *UserHandler) DeleteUser() http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		userInformation := r.Context().Value(keyValue{}).(userInformation)
-		if err := uh.repo.DeleteUser(userInformation.Username); err != nil {
+		userRecord, err := uh.repo.GetUser(userInformation.Username)
+		if err != nil {
+			rw.WriteHeader(http.StatusBadRequest)
+			data.ToJSON(&generalMessage{"User not found"}, rw)
+			return
+		}
+		if err := uh.repo.DeleteUser(userRecord.Username); err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
 			data.ToJSON(&generalMessage{err.Error()}, rw)
 			return

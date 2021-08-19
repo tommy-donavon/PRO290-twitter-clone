@@ -35,4 +35,8 @@ func SetUpRoutes(sm *mux.Router, userHandler *handlers.UserHandler) {
 	getUserHandler.HandleFunc("/", userHandler.GetLoggedInUser())
 	getUserHandler.Use(userHandler.Auth)
 
+	patchRouter := sm.Methods(http.MethodPatch).Subrouter()
+	patchRouter.HandleFunc("/", userHandler.UpdateUser())
+	patchRouter.Use(userHandler.Auth)
+
 }

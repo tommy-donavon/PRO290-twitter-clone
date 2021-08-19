@@ -29,6 +29,7 @@ func SetUpRoutes(sm *mux.Router, postHandler *handlers.PostHandler) {
 	deleteRouter.Use(postHandler.Auth)
 
 	patchRouter := sm.Methods(http.MethodPatch).Subrouter()
-	patchRouter.HandleFunc("/{id:[0-9]+}", postHandler.LikePost())
+	patchRouter.HandleFunc("/{id:[0-9]+}/like", postHandler.LikePost())
+	patchRouter.HandleFunc("/{id:[0-9]+}/unlike", postHandler.UnlikePost())
 	patchRouter.Use(postHandler.Auth)
 }
