@@ -13,6 +13,7 @@ type (
 		gorm.Model
 		PostBody     string  `gorm:"not null" json:"post_body" validate:"required"`
 		Author       string  `gorm:"not null" json:"author"`
+		AuthorURI    string  `json:"author_uri"`
 		ImageURI     string  `json:"image_uri"`
 		Likes        int     `gorm:"default:0" json:"num_likes"`
 		Reported     bool    `gorm:"default:0" json:"is_reported"`

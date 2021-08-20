@@ -23,8 +23,9 @@ type (
 		Message interface{} `json:"message"`
 	}
 	userInformation struct {
-		Username string `json:"username"`
-		UserType int    `json:"user_type"`
+		Username   string `json:"username"`
+		UserType   int    `json:"user_type"`
+		ProfileUri string `json:"profile_uri"`
 	}
 	keyValue struct{}
 )
@@ -44,6 +45,7 @@ func (ph *PostHandler) CreatePost() http.HandlerFunc {
 			return
 		}
 		post.Author = userInfo.Username
+		post.AuthorURI = userInfo.ProfileUri
 		id := getPostId(r)
 		if err := ph.repo.CreatePost(&post, uint(id)); err != nil {
 			ph.log.Println("[ERROR] saving post in database", err)
