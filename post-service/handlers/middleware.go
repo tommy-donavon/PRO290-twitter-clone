@@ -22,13 +22,13 @@ func (ph *PostHandler) Auth(next http.Handler) http.Handler {
 		if err != nil {
 
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{err.Error()}, rw)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
 			return
 		}
 
 		if resp.StatusCode != http.StatusOK {
 			rw.WriteHeader(http.StatusUnauthorized)
-			data.ToJSON(&generalMesage{"You are not authorized to make this request"}, rw)
+			data.ToJSON(&generalMessage{"You are not authorized to make this request"}, rw)
 			return
 		}
 		next.ServeHTTP(rw, r)
@@ -41,13 +41,13 @@ func (ph *PostHandler) MiddleWareValidatePost(next http.Handler) http.Handler {
 		if err := data.FromJSON(&post, r.Body); err != nil {
 			ph.log.Println("[ERROR] deserializing item", err)
 			rw.WriteHeader(http.StatusBadRequest)
-			data.ToJSON(&generalMesage{err.Error()}, rw)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
 			return
 		}
 		if err := post.Validate(); err != nil {
 			ph.log.Println("[ERROR] validating item", err)
 			rw.WriteHeader(http.StatusBadRequest)
-			data.ToJSON(&generalMesage{err.Error()}, rw)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
 			return
 		}
 		ctx := context.WithValue(r.Context(), keyValue{}, post)

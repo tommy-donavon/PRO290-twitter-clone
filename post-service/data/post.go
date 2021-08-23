@@ -1,6 +1,8 @@
 package data
 
 import (
+	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/go-playground/validator"
@@ -97,6 +99,59 @@ func (pr *PostRepo) UnlikePost(id uint) error {
 	}
 	post.Likes--
 	return pr.db.Save(&post).Error
+}
+
+func (ur *PostRepo) UpdatePost(id uint, updateinfo map[string]string) error {
+	post := ur.GetPost(id)
+	if post.Author == "" {
+		return fmt.Errorf("no post found")
+	}
+	postBytes, err := json.Marshal(post)
+	if err != nil {
+		return err
+	}
+	postMap := map[string]interface{}{}
+	err = json.Unmarshal(postBytes, &postMap)
+	if err != nil {
+		return err
+	}
+	for key, value := range updateinfo {
+		if _, ok := postMap[key]; ok {
+			switch key {
+			case "author_uri":
+				post.AuthorURI = value
+			default:
+				return fmt.Errorf("provided field %s is not updateable", key)
+			}
+		}
+	}
+	if err := post.Validate(); err != nil {
+		return err
+	}
+	return ur.db.Save(&post).Error
+
+}
+
+func (ur *PostRepo) UpdateAllAuthorUri(authorName, uri string) error {
+	posts := []*Post{}
+	err := ur.db.Where("author = ?").Find(&posts).Error
+	if err != nil {
+		return err
+	}
+	for _, value := range posts {
+		value.AuthorURI = uri
+	}
+	return ur.db.Save(posts).Error
+}
+
+func (ur *PostRepo) GetUsersPostFeed(username string) ([]*Post, error) {
+	posts := []*Post{}
+	err := ur.db.Where("author = ?", username).Order("created_at DESC").Find(&posts).Error
+	if err != nil {
+		return nil, err
+	}
+	return posts, err
+
 }
 
 func (p *Post) Validate() error {

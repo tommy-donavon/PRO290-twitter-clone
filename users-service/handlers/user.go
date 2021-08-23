@@ -8,6 +8,7 @@ import (
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/auth"
 	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/data"
+	"github.com/yhung-mea7/PRO290-twitter-clone/tree/main/users-service/register"
 )
 
 type (
@@ -16,6 +17,7 @@ type (
 		log       *log.Logger
 		jwt       *auth.JwtWrapper
 		messenger *amqp.Messenger
+		reg       *register.ConsulClient
 	}
 	generalMessage struct {
 		Message interface{} `json:"message"`
@@ -27,7 +29,7 @@ type (
 	keyValue struct{}
 )
 
-func NewUserHandler(repo *data.UserRepo, log *log.Logger, key string, messanger *amqp.Messenger) *UserHandler {
+func NewUserHandler(repo *data.UserRepo, log *log.Logger, key string, messanger *amqp.Messenger, reg *register.ConsulClient) *UserHandler {
 	return &UserHandler{
 		repo: repo,
 		log:  log,
@@ -37,6 +39,7 @@ func NewUserHandler(repo *data.UserRepo, log *log.Logger, key string, messanger 
 			ExpirationHours: 24,
 		},
 		messenger: messanger,
+		reg:       reg,
 	}
 }
 

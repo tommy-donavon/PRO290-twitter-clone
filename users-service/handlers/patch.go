@@ -25,6 +25,24 @@ func (uh *UserHandler) UpdateUser() http.HandlerFunc {
 			data.ToJSON(&generalMessage{"unable to save user information"}, rw)
 			return
 		}
+		if _, ok := requestBody["profile_uri"]; ok {
+			ser, err := uh.reg.LookUpService("post-service")
+			if err != nil {
+				rw.WriteHeader(http.StatusInternalServerError)
+				data.ToJSON(&generalMessage{"unable to contact post service"}, rw)
+				return
+			}
+			req, _ := http.NewRequest("PATCH", ser.GetHTTP()+"uri", nil)
+			req.Header.Set("Authorization", r.Header.Get("Authorization"))
+			client := &http.Client{}
+			resp, _ := client.Do(req)
+			if resp.StatusCode != http.StatusNoContent {
+				rw.WriteHeader(http.StatusInternalServerError)
+				data.ToJSON(&generalMessage{"o"}, rw)
+				return
+			}
+
+		}
 		rw.WriteHeader(http.StatusNoContent)
 	}
 }

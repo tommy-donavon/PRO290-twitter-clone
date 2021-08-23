@@ -19,7 +19,7 @@ type (
 		reg       *register.ConsulClient
 		messenger *amqp.Messenger
 	}
-	generalMesage struct {
+	generalMessage struct {
 		Message interface{} `json:"message"`
 	}
 	userInformation struct {
@@ -41,7 +41,7 @@ func (ph *PostHandler) CreatePost() http.HandlerFunc {
 		if err != nil {
 			ph.log.Println("[ERROR] Unable to establish connection to User service", err)
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{"Unable to establish connection to external service"}, rw)
+			data.ToJSON(&generalMessage{"Unable to establish connection to external service"}, rw)
 			return
 		}
 		post.Author = userInfo.Username
@@ -50,7 +50,7 @@ func (ph *PostHandler) CreatePost() http.HandlerFunc {
 		if err := ph.repo.CreatePost(&post, uint(id)); err != nil {
 			ph.log.Println("[ERROR] saving post in database", err)
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{err.Error()}, rw)
+			data.ToJSON(&generalMessage{err.Error()}, rw)
 			return
 		}
 		if id != 0 {

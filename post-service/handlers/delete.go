@@ -13,17 +13,17 @@ func (ph *PostHandler) DeletePost() http.HandlerFunc {
 		userInfo, err := ph.getUserInformation(r)
 		if err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{"Failed to connect to user api"}, rw)
+			data.ToJSON(&generalMessage{"Failed to connect to user api"}, rw)
 			return
 		}
 		if post.Author != userInfo.Username {
 			rw.WriteHeader(http.StatusBadRequest)
-			data.ToJSON(&generalMesage{"You are not authorized to delete this post"}, rw)
+			data.ToJSON(&generalMessage{"You are not authorized to delete this post"}, rw)
 			return
 		}
 		if err := ph.repo.DeletePost(post.ID); err != nil {
 			rw.WriteHeader(http.StatusInternalServerError)
-			data.ToJSON(&generalMesage{"Unable to delete post with the provied id"}, rw)
+			data.ToJSON(&generalMessage{"Unable to delete post with the provied id"}, rw)
 			return
 		}
 		rw.WriteHeader(http.StatusNoContent)

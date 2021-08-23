@@ -27,7 +27,7 @@ func main() {
 
 	userRepo := data.NewUserRepo()
 	defer userRepo.DB.Close()
-	userHandler := handlers.NewUserHandler(userRepo, logger, os.Getenv("SECRET"), amqp.NewMessenger(os.Getenv("RABBIT_CONN")))
+	userHandler := handlers.NewUserHandler(userRepo, logger, os.Getenv("SECRET"), amqp.NewMessenger(os.Getenv("RABBIT_CONN")), consulClient)
 
 	routes.SetUpRoutes(sm, userHandler)
 
