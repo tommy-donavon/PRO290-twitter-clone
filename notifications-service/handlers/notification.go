@@ -9,7 +9,6 @@ import (
 	"github.com/googollee/go-socket.io/engineio/transport"
 	"github.com/googollee/go-socket.io/engineio/transport/polling"
 	"github.com/googollee/go-socket.io/engineio/transport/websocket"
-	"github.com/jasonlvhit/gocron"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/amqp"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/data"
 	"github.com/yhung-mea7/PRO290-twitter-clone/blob/main/notifications-service/register"
@@ -55,9 +54,8 @@ func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 			},
 		},
 	})
-	getNotes := gocron.NewScheduler()
-	sc := getNotes.Start()
 	userInfo := userInformation{}
+	sc := make(chan bool)
 
 	server.OnConnect("/", func(s socketio.Conn) error {
 		s.SetContext("")
@@ -81,38 +79,39 @@ func (nh *NotificationHandler) NotificationConnection() *socketio.Server {
 			s.Close()
 			return
 		}
-		getNotes.Every(5).Seconds().Do(func() {
-			nh.log.Println("I'm being run")
-			nc, err := nh.repo.RetrieveNotifications(userInfo.Username)
-			if err != nil {
-				nh.log.Println(err)
+		go func() {
+			for {
+				select {
+				case <-sc:
+					return
+				default:
+					nc, err := nh.repo.RetrieveNotifications(userInfo.Username)
+					if err != nil {
+						nh.log.Println(err)
+					}
+					notes := nc.Notification
+					for _, v := range notes {
+						s.Emit("notification", v)
+						notes = notes[1:]
+					}
+					nc.Notification = notes
+					err = nh.repo.SaveNotifications(nc)
+					if err != nil {
+						nh.log.Println(err)
+					}
+				}
 			}
-			notes := nc.Notification
-			for _, v := range notes {
-				s.Emit("notification", v)
-				notes = notes[1:]
-			}
-			nc.Notification = notes
-			err = nh.repo.SaveNotifications(nc)
-			if err != nil {
-				nh.log.Println(err)
-			}
-		})
-		<-sc
+		}()
 	})
 
 	server.OnError("/", func(s socketio.Conn, e error) {
 		log.Println("[ERROR]:", e)
-
-		getNotes.Clear()
-		close(sc)
+		sc <- true
 	})
 
 	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
 		log.Println("[CLOSED]:", reason)
-		getNotes.Clear()
-		close(sc)
-
+		sc <- true
 	})
 	return server
 }

@@ -31,7 +31,7 @@ func (nr *NotificationRepo) RetrieveNotifications(username string) (*Notificatio
 		newKey := &NotificationCenter{Username: username, Notification: []*string{}}
 		return newKey, nr.SaveNotifications(newKey)
 	}
-	fmt.Println("checkpoint2")
+	// fmt.Println("checkpoint2")
 	outNote := []*string{}
 	err = json.Unmarshal([]byte(val), &outNote)
 	return &NotificationCenter{username, outNote}, err
